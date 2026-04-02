@@ -16,6 +16,7 @@ os.environ["LANGSMITH_API_KEY"]=os.getenv("LANGCHAIN_API_KEY")
 async def create_blogs(request:Request):
     data= await request.json()
     topic= data.get("topic","")
+    language= data.get("current_language","")
 
     # Initalize the LLM
     openai_llm_obj= OpenAILLM()
@@ -23,7 +24,10 @@ async def create_blogs(request:Request):
     # Initialize the Graph
     graph_obj= GraphBuilder(llm)
 
-    if topic:
+    if topic and language:
+        graph= graph_obj.setup_graph(usecase="language")
+        state= graph.invoke({"topic":topic, "current_language":language})
+    elif topic:
         graph= graph_obj.setup_graph(usecase="topic")
         state= graph.invoke({"topic":topic})
     
